@@ -7,5 +7,7 @@ namespace TestCase.Domain.Entities
     {
         public Guid JobId { get; set; }
         public required SideRightTypes SideRight { get; set; }
+
+        public Job? Job { get; set; }
     }
 }

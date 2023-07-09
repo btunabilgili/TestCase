@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace TestCase.Domain.Common
 {
     public abstract class BaseEntity

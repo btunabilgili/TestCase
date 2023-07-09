@@ -12,5 +12,8 @@ namespace TestCase.Domain.Entities
         public ICollection<SideRights>? SideRights { get; set; }
         public WorkTypes WorkType { get; set; }
         public int SalaryInformation { get; set; }
+
+        public Guid CompanyId { get; set; }
+        public required Company Company { get; set; }
     }
 }

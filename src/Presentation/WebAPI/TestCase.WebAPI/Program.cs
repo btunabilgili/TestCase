@@ -1,3 +1,5 @@
+using TestCase.Application.Extensions;
+using TestCase.Infrastructure.Extensions;
 
 namespace TestCase.WebAPI
 {
@@ -10,6 +12,9 @@ namespace TestCase.WebAPI
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("PostgreSQL")!);
 
             var app = builder.Build();
 
