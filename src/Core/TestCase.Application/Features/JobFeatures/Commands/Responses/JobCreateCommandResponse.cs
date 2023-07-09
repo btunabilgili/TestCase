@@ -1,10 +1,11 @@
-﻿using TestCase.Domain.Common;
+﻿using TestCase.Domain.Entities;
 using TestCase.Domain.Enums;
 
-namespace TestCase.Domain.Entities
+namespace TestCase.Application.Features.JobFeatures.Commands.Responses
 {
-    public class Job : BaseEntity
+    public class JobCreateCommandResponse
     {
+        public required Guid Id { get; set; }
         public required string Position { get; set; }
         public required string JobDescription { get; set; }
         public DateTime ExpirationDate { get; set; }
@@ -14,6 +15,5 @@ namespace TestCase.Domain.Entities
         public int SalaryInformation { get; set; }
 
         public required Guid CompanyId { get; set; }
-        public required Company Company { get; set; }
     }
 }

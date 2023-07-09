@@ -1,10 +1,11 @@
-﻿using TestCase.Domain.Common;
+﻿using TestCase.Domain.Entities;
 using TestCase.Domain.Enums;
 
-namespace TestCase.Domain.Entities
+namespace TestCase.Application.Features.JobFeatures.Queries.Responses
 {
-    public class Job : BaseEntity
+    public class GetJobByIdQueryResponse
     {
+        public required Guid Id { get; set; }
         public required string Position { get; set; }
         public required string JobDescription { get; set; }
         public DateTime ExpirationDate { get; set; }

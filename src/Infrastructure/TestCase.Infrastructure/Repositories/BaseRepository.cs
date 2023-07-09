@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TestCase.Application.Interfaces;
 using TestCase.Domain.Common;
 using TestCase.Domain.Exceptions;
@@ -15,12 +16,12 @@ namespace TestCase.Infrastructure.Repositories
             _dbSet = dbContext?.Set<T>() ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public virtual async Task DeleteAsync(Guid id)
         {
             var entity = await _dbSet.FindAsync(id);
 
@@ -28,17 +29,40 @@ namespace TestCase.Infrastructure.Repositories
                 _dbSet.Remove(entity);
         }
 
-        public async Task<List<T>> GetAllAsync()
+        public virtual async Task<List<T>> GetListAsync(Expression<Func<T, object>>? includeExpression = null, Expression<Func<T, bool>>? predicate = null)
         {
-            return await _dbSet.ToListAsync();
+            var query = _dbSet.AsQueryable();
+
+            if (includeExpression is not null)
+                query = query.Include(includeExpression);
+
+            if (predicate is not null)
+                query = query.Where(predicate);
+
+            return await query.ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(Guid id)
+        public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
+
+        public virtual async Task<List<T>> GetAllAsync(Expression<Func<T, object>>? includeExpression = null)
+        {
+            var query = _dbSet.AsQueryable();
+
+            if (includeExpression is not null)
+                query = query.Include(includeExpression);
+
+            return await query.ToListAsync();
+        }
+
+        public virtual async Task<T> GetByIdAsync(Guid id, Expression<Func<T, object>>? includeExpression = null)
         {
             return await _dbSet.FindAsync(id) ?? throw new EntityNotFoundException("Entity not found");
         }
 
-        public void Update(T entity)
+        public virtual void Update(T entity)
         {
             _dbSet.Update(entity);
         }

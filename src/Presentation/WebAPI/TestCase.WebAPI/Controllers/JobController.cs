@@ -1,28 +1,24 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using TestCase.Application.Features.CompanyFeatures.Commands.Requests;
-using TestCase.Application.Features.CompanyFeatures.Queries.Requests;
-using TestCase.Application.Interfaces;
-using TestCase.Domain.Entities;
-using TestCase.Infrastructure.Contexts;
+using TestCase.Application.Features.JobFeatures.Commands.Requests;
+using TestCase.Application.Features.JobFeatures.Queries.Requests;
 
 namespace TestCase.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CompanyController : ControllerBase
+    public class JobController : ControllerBase
     {
         private readonly IMediator _mediator;
-        public CompanyController(IMediator mediator)
+        public JobController(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCompanyById(Guid id)
+        public async Task<IActionResult> GetJobById(Guid id)
         {
-            var result = await _mediator.Send(new GetCompanyByIdQueryRequest
+            var result = await _mediator.Send(new GetJobByIdQueryRequest
             {
                 Id = id
             });
@@ -33,10 +29,13 @@ namespace TestCase.WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GettAllCompanies()
+        [HttpGet("company/{companyId}")]
+        public async Task<IActionResult> GetJobsByCompanyId(Guid companyId)
         {
-            var result = await _mediator.Send(new GetAllCompaniesQueryRequest());
+            var result = await _mediator.Send(new GetJobsByComapnyIdQueryRequest 
+            { 
+                ComapnyId = companyId
+            });
 
             if (!result.IsSuccess)
                 return StatusCode(result.StatusCode, result);
@@ -45,7 +44,7 @@ namespace TestCase.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCompany(CreateCompanyCommandRequest request)
+        public async Task<IActionResult> CreateJob(JobCreateCommandRequest request)
         {
             var result = await _mediator.Send(request);
 
@@ -56,7 +55,7 @@ namespace TestCase.WebAPI.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateCompany(UpdateCompanyCommandRequest request)
+        public async Task<IActionResult> UpdateJob(JobUpdateCommandRequest request)
         {
             var result = await _mediator.Send(request);
 

@@ -19,6 +19,7 @@ namespace TestCase.Infrastructure.Extensions
             services.AddScoped(typeof(IUnitOfWork<,>), typeof(UnitOfWork<,>));
 
             services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IJobService, JobService>();
 
             return services;
         }
