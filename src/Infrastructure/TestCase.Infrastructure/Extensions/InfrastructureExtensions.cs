@@ -22,6 +22,7 @@ namespace TestCase.Infrastructure.Extensions
             services.AddHangfireServer();
 
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
             services.AddTransient<IHangfireService, HangfireService>();
             services.AddTransient<IFakeEmailService, FakeEmailService>();

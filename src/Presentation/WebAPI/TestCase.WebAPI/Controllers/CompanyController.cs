@@ -64,5 +64,16 @@ namespace TestCase.WebAPI.Controllers
 
             return Ok(result);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCompany(DeleteCompanyCommandRequest request)
+        {
+            var result = await _mediator.Send(request);
+
+            if (!result.IsSuccess)
+                return StatusCode(result.StatusCode, result);
+
+            return Ok(result);
+        }
     }
 }

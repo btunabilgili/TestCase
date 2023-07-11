@@ -12,16 +12,16 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
 {
     public class JobUpdateCommandHandler : IRequestHandler<JobUpdateCommandRequest, Result<JobUpdateCommandResponse>>
     {
-        private readonly IBaseRepository<Job> _repository;
+        private readonly IUnitOfWork _uow;
         private readonly IJobService _jobService;
         private readonly IMapper _mapper;
         private readonly IValidator<JobUpdateCommandRequest> _validator;
-        public JobUpdateCommandHandler(IBaseRepository<Job> repository,
+        public JobUpdateCommandHandler(IUnitOfWork uow,
             IJobService jobService,
             IMapper mapper,
             IValidator<JobUpdateCommandRequest> validator)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _uow = uow ?? throw new ArgumentNullException(nameof(uow));
             _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
@@ -37,8 +37,9 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
             var job = _mapper.Map<Job>(request);
 
             job.QualityPoint = _jobService.CalculateJobQualityPoint(job);
+            await _uow.JobRepository.UpdateAsync(job);
 
-            _repository.Update(job);
+            await _uow.SaveChangesAsync();
 
             return _mapper.Map<JobUpdateCommandResponse>(job).ToResult();
         }

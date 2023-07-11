@@ -13,19 +13,17 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
 {
     public class JobCreateCommandHandler : IRequestHandler<JobCreateCommandRequest, Result<JobCreateCommandResponse>>
     {
-        private readonly IBaseRepository<Job> _jobRepository;
-        private readonly IBaseRepository<Company> _companyRepository;
+        private readonly IUnitOfWork _uow;
         private readonly IJobService _jobService;
         private readonly IMapper _mapper;
         private readonly IValidator<JobCreateCommandRequest> _validator;
-        public JobCreateCommandHandler(IBaseRepository<Job> jobRepository,
+        public JobCreateCommandHandler(IUnitOfWork uow,
             IBaseRepository<Company> companyRepository,
             IJobService jobService,
             IMapper mapper,
             IValidator<JobCreateCommandRequest> validator)
         {
-            _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
-            _companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+            _uow = uow ?? throw new ArgumentNullException(nameof(uow));
             _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
@@ -38,7 +36,7 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
             if (!validationResult.IsValid)
                 return Result<JobCreateCommandResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var company = await _companyRepository.GetByIdAsync(request.CompanyId);
+            var company = await _uow.CompanyRepository.GetByIdAsync(request.CompanyId);
 
             if (company is null)
                 return Result<JobCreateCommandResponse>.Failure("Company not found", (int)HttpStatusCode.NotFound);
@@ -46,14 +44,12 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
             var job = _mapper.Map<Job>(request);
 
             job.QualityPoint = _jobService.CalculateJobQualityPoint(job);
+            await _uow.JobRepository.AddAsync(job);
 
-            await _jobRepository.AddAsync(job);
-
-            //TODO: transaction between company and job!
             company.RemainingJobCount -= 1;
+            await _uow.CompanyRepository.UpdateAsync(company);
 
-            _companyRepository.Update(company);
-            
+            await _uow.SaveChangesAsync();
 
             return _mapper.Map<JobCreateCommandResponse>(job).ToResult();
         }

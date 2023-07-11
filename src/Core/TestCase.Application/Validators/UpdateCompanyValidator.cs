@@ -13,16 +13,21 @@ namespace TestCase.Application.Validators
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Id must not be empty");
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Id must not be empty").MustAsync(CompanyExists).WithMessage("Company not found.");
             RuleFor(x => x.CompanyName).NotEmpty().WithMessage("Company Name must not be empty");
             RuleFor(x => x.Address).NotEmpty().WithMessage("Address must not be empty");
-            RuleFor(x => x.Phone).NotEmpty().WithMessage("Phone must not be empty").Must((model, phone) => BeUniquePhoneNumber(model.Phone!, model.Id)).WithMessage("Phone number is already registered").MustAsync(BeValidPhoneNumber).WithMessage("Please enter a valid phone number. '05xx-xxx-xx-xx'");
+            RuleFor(x => x.Phone).NotEmpty().WithMessage("Phone must not be empty").MustAsync(async (model, phone, cancellationToken) => await BeUniquePhoneNumber(model.Phone!, model.Id)).WithMessage("Phone number is already registered").MustAsync(BeValidPhoneNumber).WithMessage("Please enter a valid phone number. '05xx-xxx-xx-xx'");
             RuleFor(x => x.Email).NotEmpty().WithMessage("Email must not be empty").MustAsync(BeValidEmail).WithMessage("Please enter a valid email. 'test@test.com'");
         }
 
-        private bool BeUniquePhoneNumber(string phoneNumber, Guid id)
+        private async Task<bool> CompanyExists(Guid companyId, CancellationToken cancellationToken)
         {
-            return _repository.FirstOrDefaultAsync(x => x.Phone == phoneNumber && x.Id != id) is null;
+            return await _repository.GetByIdAsync(companyId) is not null;
+        }
+
+        private async Task<bool> BeUniquePhoneNumber(string phoneNumber, Guid id)
+        {
+            return await _repository.FirstOrDefaultAsync(x => x.Phone == phoneNumber && x.Id != id) is null;
         }
 
         private Task<bool> BeValidPhoneNumber(string? phoneNumber, CancellationToken cancellation)

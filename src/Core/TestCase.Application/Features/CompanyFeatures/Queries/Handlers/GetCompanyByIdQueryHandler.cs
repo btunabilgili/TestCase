@@ -31,7 +31,7 @@ namespace TestCase.Application.Features.CompanyFeatures.Queries.Handlers
             if (!validationResult.IsValid)
                 return Result<GetCompanyByIdQueryResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var company = await _repository.GetByIdAsync(request.Id);
+            var company = await _repository.GetByIdAsync(request.Id, x => x.Jobs!);
 
             if (company is null)
                 return Result<GetCompanyByIdQueryResponse>.Failure("Company not found", (int)HttpStatusCode.NotFound);

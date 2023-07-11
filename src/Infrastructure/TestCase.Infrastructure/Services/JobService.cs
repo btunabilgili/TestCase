@@ -13,7 +13,7 @@ namespace TestCase.Infrastructure.Services
             if (job.WorkType is not null)
                 qualityPoint += 1;
 
-            if (job.SalaryInformation is not null)
+            if (job.SalaryInformation > 0)
                 qualityPoint += 1;
 
             if (job.SideRights?.Any() == true)

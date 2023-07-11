@@ -12,14 +12,14 @@ namespace TestCase.Application.Features.CompanyFeatures.Commands.Handlers
 {
     public class UpdateCompanyCommandHandler : IRequestHandler<UpdateCompanyCommandRequest, Result<UpdateCompanyCommandResponse>>
     {
-        private readonly IBaseRepository<Company> _repository;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IValidator<UpdateCompanyCommandRequest> _validator;
-        public UpdateCompanyCommandHandler(IBaseRepository<Company> repository, 
+        public UpdateCompanyCommandHandler(IUnitOfWork uow, 
             IMapper mapper,
             IValidator<UpdateCompanyCommandRequest> validator)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _uow = uow ?? throw new ArgumentNullException(nameof(uow));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
@@ -33,7 +33,8 @@ namespace TestCase.Application.Features.CompanyFeatures.Commands.Handlers
 
             var company = _mapper.Map<Company>(request);
 
-            _repository.Update(company);
+            await _uow.CompanyRepository.UpdateAsync(company);
+            await _uow.SaveChangesAsync();
 
             return _mapper.Map<UpdateCompanyCommandResponse>(company).ToResult();
         }
