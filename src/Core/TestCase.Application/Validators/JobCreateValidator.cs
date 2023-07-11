@@ -18,7 +18,7 @@ namespace TestCase.Application.Validators
 
         private async Task<bool> CheckForRemaningJobPost(Guid companyId, CancellationToken cancellation)
         {
-            var result = await _companyService.GetCompanyByIdAsync(companyId);
+            var result = await _companyService.GetCompanyAsync(x => x.Id == companyId);
 
             if (result is null || result.IsSuccess == false)
                 return false;

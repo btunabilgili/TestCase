@@ -30,7 +30,7 @@ namespace TestCase.Application.Features.CompanyFeatures.Queries.Handlers
             if (!validationResult.IsValid)
                 return Result<GetCompanyByIdQueryResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var result = await _companyService.GetCompanyByIdAsync(request.Id);
+            var result = await _companyService.GetCompanyAsync(x => x.Id == request.Id);
 
             if (!result.IsSuccess)
                 return Result<GetCompanyByIdQueryResponse>.Failure(result.ErrorMessage!, result.StatusCode);

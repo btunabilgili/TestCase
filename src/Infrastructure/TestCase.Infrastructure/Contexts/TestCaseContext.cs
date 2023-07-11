@@ -9,15 +9,10 @@ namespace TestCase.Infrastructure.Contexts
         public TestCaseContext(DbContextOptions<TestCaseContext> options)
             : base(options)
         {
+            ChangeTracker.LazyLoadingEnabled = false;
         }
 
         public DbSet<Company> Companies { get; set; }
         public DbSet<Job> Jobs { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfiguration(new CompanyConfiguration());
-            modelBuilder.ApplyConfiguration(new JobConfiguration());
-        }
     }
 }

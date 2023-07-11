@@ -11,9 +11,10 @@ namespace TestCase.Infrastructure.Contexts.Configurations
             builder.HasKey(j => j.Id);
             builder.Property(j => j.Position).IsRequired();
             builder.Property(j => j.JobDescription).IsRequired();
-            builder.Property(j => j.ExpirationDate).IsRequired();
+            builder.Property(j => j.ListingDurationInDays).IsRequired();
             builder.Property(j => j.QualityPoint).IsRequired();
-            builder.Property(j => j.SalaryInformation).IsRequired();
+            builder.Property(j => j.SalaryInformation);
+            builder.Property(j => j.WorkType);
 
             builder.HasOne(j => j.Company)
                 .WithMany(c => c.Jobs)

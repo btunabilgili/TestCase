@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Linq.Expressions;
+using System.Net;
+using System.Text.RegularExpressions;
 using TestCase.Application.Common;
 using TestCase.Application.Interfaces;
 using TestCase.Domain.Entities;
@@ -77,6 +79,44 @@ namespace TestCase.Infrastructure.Services
             catch (Exception ex)
             {
                 return Result<bool>.Failure(ex.Message, (int)HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public int CalculateJobQualityPoint(Job job)
+        {
+            int qualityPoint = 0;
+
+            if (job.WorkType is not null)
+                qualityPoint += 1;
+
+            if (job.SalaryInformation is not null)
+                qualityPoint += 1;
+
+            if (job.SideRights?.Any() == true)
+                qualityPoint += 1;
+
+            //Yasaklı kelimeleri veritabanı ya da başka bir sağlayıcıdan çekmek daha doğru olacaktır ancak şimdilik projenin hızlı ilerlemesi açısından kod içerisinde bırakıldı.
+            string badWordsPattern = @"\b(mobing|ırkçılık)\b";
+
+            Regex regex = new(badWordsPattern, RegexOptions.IgnoreCase);
+
+            if (!regex.IsMatch(job.JobDescription))
+                qualityPoint += 2;
+            else
+                job.JobDescription = regex.Replace(job.JobDescription, " ");
+
+            return qualityPoint;
+        }
+
+        public async Task<Result<List<Job>>> GetJobsAsync(Expression<Func<Job, bool>> predicate)
+        {
+            try
+            {
+                return (await _uow.Repository.GetListAsync(predicate: predicate)).ToResult();
+            }
+            catch (Exception ex)
+            {
+                return Result<List<Job>>.Failure(ex.Message, (int)HttpStatusCode.InternalServerError);
             }
         }
     }

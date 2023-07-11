@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq.Expressions;
+using System.Net;
 using TestCase.Application.Common;
 using TestCase.Application.Interfaces;
 using TestCase.Domain.Entities;
@@ -46,7 +47,7 @@ namespace TestCase.Infrastructure.Services
         {
             try
             {
-                return (await _uow.Repository.GetAllAsync()).ToResult();
+                return (await _uow.Repository.GetAllAsync(includeExpression: x => x.Jobs!)).ToResult();
             }
             catch (Exception ex)
             {
@@ -54,11 +55,16 @@ namespace TestCase.Infrastructure.Services
             }
         }
 
-        public async Task<Result<Company>> GetCompanyByIdAsync(Guid id)
+        public async Task<Result<Company>> GetCompanyAsync(Expression<Func<Company, bool>> predicate)
         {
             try
             {
-                return (await _uow.Repository.GetByIdAsync(id)).ToResult();
+                var company = await _uow.Repository.FirstOrDefaultAsync(predicate);
+
+                if (company == null)
+                    return Result<Company>.Failure("Company not found", (int)HttpStatusCode.NotFound);
+
+                return company.ToResult();
             }
             catch (Exception ex)
             {
@@ -68,12 +74,19 @@ namespace TestCase.Infrastructure.Services
 
         public async Task<Result<bool>> IsPhoneNumberUnique(string phoneNumber)
         {
-            var record = await _uow.Repository.FirstOrDefaultAsync(x => x.Phone == phoneNumber);
+            try
+            {
+                var record = await _uow.Repository.FirstOrDefaultAsync(x => x.Phone == phoneNumber);
 
-            if (record is not null)
-                return Result<bool>.Failure("Phone Number must be unique", (int)HttpStatusCode.BadRequest);
+                if (record is not null)
+                    return Result<bool>.Failure("Phone Number must be unique", (int)HttpStatusCode.BadRequest);
 
-            return true.ToResult();
+                return true.ToResult();
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure(ex.Message, (int)HttpStatusCode.InternalServerError);
+            }
         }
 
         public async Task<Result<bool>> UpdateCompanyAsync(Company company)

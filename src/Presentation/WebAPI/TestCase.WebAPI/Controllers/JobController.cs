@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TestCase.Application.Features.JobFeatures.Commands.Requests;
 using TestCase.Application.Features.JobFeatures.Queries.Requests;
 
 namespace TestCase.WebAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class JobController : ControllerBase
@@ -21,6 +23,20 @@ namespace TestCase.WebAPI.Controllers
             var result = await _mediator.Send(new GetJobByIdQueryRequest
             {
                 Id = id
+            });
+
+            if (!result.IsSuccess)
+                return StatusCode(result.StatusCode, result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("listing-duration/{duration}")]
+        public async Task<IActionResult> GetJobsByListingDuration(int duration)
+        {
+            var result = await _mediator.Send(new GetJobsByListingDurationQueryRequest
+            {
+                ListingDurationInDays = duration
             });
 
             if (!result.IsSuccess)

@@ -59,7 +59,14 @@ namespace TestCase.Infrastructure.Repositories
 
         public virtual async Task<T> GetByIdAsync(Guid id, Expression<Func<T, object>>? includeExpression = null)
         {
-            return await _dbSet.FindAsync(id) ?? throw new EntityNotFoundException("Entity not found");
+            var query = _dbSet.AsQueryable();
+
+            if (includeExpression is not null)
+                query = query.Include(includeExpression);
+
+            query = query.Where(x => x.Id == id);
+
+            return await query.FirstOrDefaultAsync() ?? throw new EntityNotFoundException("Entity not found");
         }
 
         public virtual void Update(T entity)

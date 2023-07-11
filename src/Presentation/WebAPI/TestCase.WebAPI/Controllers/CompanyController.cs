@@ -1,14 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using TestCase.Application.Features.CompanyFeatures.Commands.Requests;
 using TestCase.Application.Features.CompanyFeatures.Queries.Requests;
-using TestCase.Application.Interfaces;
-using TestCase.Domain.Entities;
-using TestCase.Infrastructure.Contexts;
 
 namespace TestCase.WebAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CompanyController : ControllerBase
@@ -44,6 +42,7 @@ namespace TestCase.WebAPI.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateCompany(CreateCompanyCommandRequest request)
         {

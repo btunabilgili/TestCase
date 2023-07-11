@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
 using System.Net;
@@ -37,13 +36,15 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
 
             var job = _mapper.Map<Job>(request);
 
+            job.QualityPoint = _jobService.CalculateJobQualityPoint(job);
+
             var result = await _jobService.CreateJobAsync(job);
 
             if (!result.IsSuccess)
                 return Result<JobCreateCommandResponse>.Failure(result.ErrorMessage!, result.StatusCode);
 
             //TODO: transaction between company and job!
-            var companyResult = await _companyService.GetCompanyByIdAsync(job.CompanyId);
+            var companyResult = await _companyService.GetCompanyAsync(x => x.Id == job.CompanyId);
             var company = companyResult.Data!;
             company.RemainingJobCount -= 1;
 

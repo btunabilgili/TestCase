@@ -20,6 +20,7 @@ namespace TestCase.Infrastructure.Extensions
 
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IJobService, JobService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

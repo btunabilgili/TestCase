@@ -23,10 +23,10 @@ namespace TestCase.Application.Mapping
             #endregion
 
             #region Job
-            CreateMap<JobCreateCommandRequest, Job>();
-            CreateMap<Job, JobCreateCommandResponse>();
-            CreateMap<Job, GetJobByIdQueryResponse>();
-            CreateMap<Job, GetJobsByCompanyIdQueryResponse>();
+            CreateMap<JobCreateCommandRequest, Job>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? src.SideRights.Select(sideRight => new SideRights { SideRight = sideRight }) : null));
+            CreateMap<Job, JobCreateCommandResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? src.SideRights.Select(sideRight => sideRight.SideRight) : null));
+            CreateMap<Job, GetJobByIdQueryResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? src.SideRights.Select(sideRight => sideRight.SideRight) : null));
+            CreateMap<Job, GetJobsByCompanyIdQueryResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? src.SideRights.Select(sideRight => sideRight.SideRight) : null));
             #endregion
         }
     }
