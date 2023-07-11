@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TestCase.Application.Interfaces;
 using TestCase.Infrastructure.Contexts;
@@ -10,10 +13,14 @@ namespace TestCase.Infrastructure.Extensions
 {
     public static class InfrastructureExtensions
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString, string hangfireConnectionString)
         {
             services.AddDbContext<TestCaseContext>(options =>
                 options.UseNpgsql(connectionString));
+
+            services.AddHangfire(options =>
+                options.UsePostgreSqlStorage(hangfireConnectionString));
+            services.AddHangfireServer();
 
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped(typeof(IUnitOfWork<,>), typeof(UnitOfWork<,>));
@@ -23,6 +30,13 @@ namespace TestCase.Infrastructure.Extensions
             services.AddScoped<IAuthService, AuthService>();
 
             return services;
+        }
+
+        public static IApplicationBuilder UseInfrastructure(this IApplicationBuilder app)
+        {
+            app.UseHangfireDashboard();
+
+            return app;
         }
     }
 }

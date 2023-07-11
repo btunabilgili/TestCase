@@ -95,7 +95,7 @@ namespace TestCase.WebAPI
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JWTSettings"));
 
             builder.Services.AddApplication();
-            builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("PostgreSQL")!);
+            builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("testCase")!, builder.Configuration.GetConnectionString("hangfire")!);
 
             var app = builder.Build();
 
@@ -111,6 +111,8 @@ namespace TestCase.WebAPI
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseInfrastructure();
 
             app.MapControllers();
 
