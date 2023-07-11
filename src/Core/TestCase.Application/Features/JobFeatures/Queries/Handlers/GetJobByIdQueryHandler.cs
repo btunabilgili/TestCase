@@ -6,19 +6,20 @@ using TestCase.Application.Common;
 using TestCase.Application.Features.JobFeatures.Queries.Requests;
 using TestCase.Application.Features.JobFeatures.Queries.Responses;
 using TestCase.Application.Interfaces;
+using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
 {
     public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQueryRequest, Result<GetJobByIdQueryResponse>>
     {
-        private readonly IJobService _jobService;
+        private readonly IBaseRepository<Job> _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<GetJobByIdQueryRequest> _validator;
-        public GetJobByIdQueryHandler(IJobService jobService, 
+        public GetJobByIdQueryHandler(IBaseRepository<Job> repository, 
             IMapper mapper,
             IValidator<GetJobByIdQueryRequest> validator)
         {
-            _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator)); 
         }
@@ -30,12 +31,12 @@ namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
             if (!validationResult.IsValid)
                 return Result<GetJobByIdQueryResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var result = await _jobService.GetJobByIdAsync(request.Id);
+            var job = await _repository.GetByIdAsync(request.Id);
 
-            if (!result.IsSuccess)
-                return Result<GetJobByIdQueryResponse>.Failure(result.ErrorMessage!, result.StatusCode);
+            if (job is null)
+                return Result<GetJobByIdQueryResponse>.Failure("Job not found", (int)HttpStatusCode.NotFound);
 
-            return _mapper.Map<GetJobByIdQueryResponse>(result.Data).ToResult();
+            return _mapper.Map<GetJobByIdQueryResponse>(job).ToResult();
         }
     }
 }

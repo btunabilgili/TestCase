@@ -2,6 +2,7 @@
 using System.Reflection;
 using FluentValidation;
 using TestCase.Application.Tools;
+using TestCase.Application.Interfaces;
 
 namespace TestCase.Application.Extensions
 {
@@ -12,6 +13,7 @@ namespace TestCase.Application.Extensions
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         }
     }
 }

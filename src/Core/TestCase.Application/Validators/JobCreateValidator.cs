@@ -1,15 +1,16 @@
 ﻿using FluentValidation;
 using TestCase.Application.Features.JobFeatures.Commands.Requests;
 using TestCase.Application.Interfaces;
+using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Validators
 {
     public class JobCreateValidator : AbstractValidator<JobCreateCommandRequest>
     {
-        private readonly ICompanyService _companyService;
-        public JobCreateValidator(ICompanyService companyService)
+        private readonly IBaseRepository<Company> _repository;
+        public JobCreateValidator(IBaseRepository<Company> repository)
         {
-            _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
             RuleFor(x => x.Position).NotEmpty().WithMessage("Position must not be empty");
             RuleFor(x => x.JobDescription).NotEmpty().WithMessage("Job description must not be empty");
@@ -18,12 +19,12 @@ namespace TestCase.Application.Validators
 
         private async Task<bool> CheckForRemaningJobPost(Guid companyId, CancellationToken cancellation)
         {
-            var result = await _companyService.GetCompanyAsync(x => x.Id == companyId);
+            var company = await _repository.GetByIdAsync(companyId);
 
-            if (result is null || result.IsSuccess == false)
+            if (company is null)
                 return false;
 
-            return result.Data!.RemainingJobCount > 0;
+            return company.RemainingJobCount > 0;
         }
     }
 }

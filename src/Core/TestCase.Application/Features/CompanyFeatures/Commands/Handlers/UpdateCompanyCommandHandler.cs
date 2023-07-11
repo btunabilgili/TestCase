@@ -6,21 +6,20 @@ using TestCase.Application.Common;
 using TestCase.Application.Features.CompanyFeatures.Commands.Requests;
 using TestCase.Application.Features.CompanyFeatures.Commands.Responses;
 using TestCase.Application.Interfaces;
-using TestCase.Application.Validators;
 using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Features.CompanyFeatures.Commands.Handlers
 {
     public class UpdateCompanyCommandHandler : IRequestHandler<UpdateCompanyCommandRequest, Result<UpdateCompanyCommandResponse>>
     {
-        private readonly ICompanyService _companyService;
+        private readonly IBaseRepository<Company> _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<UpdateCompanyCommandRequest> _validator;
-        public UpdateCompanyCommandHandler(ICompanyService companyService, 
+        public UpdateCompanyCommandHandler(IBaseRepository<Company> repository, 
             IMapper mapper,
             IValidator<UpdateCompanyCommandRequest> validator)
         {
-            _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
@@ -34,12 +33,9 @@ namespace TestCase.Application.Features.CompanyFeatures.Commands.Handlers
 
             var company = _mapper.Map<Company>(request);
 
-            var result = await _companyService.CreateCompanyAsync(company);
+            _repository.Update(company);
 
-            if (!result.IsSuccess)
-                return Result<UpdateCompanyCommandResponse>.Failure(result.ErrorMessage!, result.StatusCode);
-
-            return _mapper.Map<UpdateCompanyCommandResponse>(result.Data).ToResult();
+            return _mapper.Map<UpdateCompanyCommandResponse>(company).ToResult();
         }
     }
 }

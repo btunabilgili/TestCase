@@ -21,12 +21,29 @@ namespace TestCase.Infrastructure.Repositories
             await _dbSet.AddAsync(entity);
         }
 
+        public virtual void Update(T entity)
+        {
+            _dbSet.Update(entity);
+        }
+
         public virtual async Task DeleteAsync(Guid id)
         {
             var entity = await _dbSet.FindAsync(id);
 
             if (entity is not null)
                 _dbSet.Remove(entity);
+        }
+
+        public virtual async Task<T> GetByIdAsync(Guid id, Expression<Func<T, object>>? includeExpression = null)
+        {
+            var query = _dbSet.AsQueryable();
+
+            if (includeExpression is not null)
+                query = query.Include(includeExpression);
+
+            query = query.Where(x => x.Id == id);
+
+            return await query.FirstOrDefaultAsync() ?? throw new EntityNotFoundException("Entity not found");
         }
 
         public virtual async Task<List<T>> GetListAsync(Expression<Func<T, object>>? includeExpression = null, Expression<Func<T, bool>>? predicate = null)
@@ -42,36 +59,17 @@ namespace TestCase.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-        public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
-        {
-            return await _dbSet.FirstOrDefaultAsync(predicate);
-        }
-
-        public virtual async Task<List<T>> GetAllAsync(Expression<Func<T, object>>? includeExpression = null)
+        public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>? includeExpression = null)
         {
             var query = _dbSet.AsQueryable();
 
             if (includeExpression is not null)
                 query = query.Include(includeExpression);
 
-            return await query.ToListAsync();
-        }
+            if (predicate is not null)
+                query = query.Where(predicate);
 
-        public virtual async Task<T> GetByIdAsync(Guid id, Expression<Func<T, object>>? includeExpression = null)
-        {
-            var query = _dbSet.AsQueryable();
-
-            if (includeExpression is not null)
-                query = query.Include(includeExpression);
-
-            query = query.Where(x => x.Id == id);
-
-            return await query.FirstOrDefaultAsync() ?? throw new EntityNotFoundException("Entity not found");
-        }
-
-        public virtual void Update(T entity)
-        {
-            _dbSet.Update(entity);
+            return await query.FirstOrDefaultAsync();
         }
     }
 }

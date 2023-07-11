@@ -6,19 +6,20 @@ using TestCase.Application.Common;
 using TestCase.Application.Features.JobFeatures.Queries.Requests;
 using TestCase.Application.Features.JobFeatures.Queries.Responses;
 using TestCase.Application.Interfaces;
+using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
 {
     public class GetJobsByCompanyIdQueryHandler : IRequestHandler<GetJobsByComapnyIdQueryRequest, Result<List<GetJobsByCompanyIdQueryResponse>>>
     {
-        private readonly IJobService _jobService;
+        private readonly IBaseRepository<Job> _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<GetJobsByComapnyIdQueryRequest> _validator;
-        public GetJobsByCompanyIdQueryHandler(IJobService jobService, 
+        public GetJobsByCompanyIdQueryHandler(IBaseRepository<Job> repository, 
             IMapper mapper,
             IValidator<GetJobsByComapnyIdQueryRequest> validator)
         {
-            _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator)); 
         }
@@ -30,12 +31,12 @@ namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
             if (!validationResult.IsValid)
                 return Result<List<GetJobsByCompanyIdQueryResponse>>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var result = await _jobService.GetJobsByCompanyId(request.ComapnyId);
+            var jobs = await _repository.GetListAsync(x => x.CompanyId == request.ComapnyId);
 
-            if (!result.IsSuccess)
-                return Result<List<GetJobsByCompanyIdQueryResponse>>.Failure(result.ErrorMessage!, result.StatusCode);
+            if (jobs is null || !jobs.Any())
+                return Result<List<GetJobsByCompanyIdQueryResponse>>.Failure("No jobs found for that criteria", (int)HttpStatusCode.NotFound);
 
-            return _mapper.Map<List<GetJobsByCompanyIdQueryResponse>>(result.Data).ToResult();
+            return _mapper.Map<List<GetJobsByCompanyIdQueryResponse>>(jobs).ToResult();
         }
     }
 }

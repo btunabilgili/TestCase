@@ -7,7 +7,6 @@ using TestCase.Application.Interfaces;
 using TestCase.Infrastructure.Contexts;
 using TestCase.Infrastructure.Repositories;
 using TestCase.Infrastructure.Services;
-using TestCase.Infrastructure.UnitOfWork;
 
 namespace TestCase.Infrastructure.Extensions
 {
@@ -23,14 +22,10 @@ namespace TestCase.Infrastructure.Extensions
             services.AddHangfireServer();
 
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-            services.AddScoped(typeof(IUnitOfWork<,>), typeof(UnitOfWork<,>));
-
-            services.AddScoped<ICompanyService, CompanyService>();
-            services.AddScoped<IJobService, JobService>();
-            services.AddScoped<IAuthService, AuthService>();
 
             services.AddTransient<IHangfireService, HangfireService>();
             services.AddTransient<IFakeEmailService, FakeEmailService>();
+            services.AddTransient<IJobService, JobService>();
 
             return services;
         }

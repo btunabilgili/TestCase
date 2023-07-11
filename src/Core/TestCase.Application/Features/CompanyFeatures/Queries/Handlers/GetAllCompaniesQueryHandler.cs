@@ -1,30 +1,32 @@
 ﻿using AutoMapper;
 using MediatR;
+using System.Net;
 using TestCase.Application.Common;
 using TestCase.Application.Features.CompanyFeatures.Queries.Requests;
 using TestCase.Application.Features.CompanyFeatures.Queries.Responses;
 using TestCase.Application.Interfaces;
+using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Features.CompanyFeatures.Queries.Handlers
 {
     public class GetAllCompaniesQueryHandler : IRequestHandler<GetAllCompaniesQueryRequest, Result<List<GetAllCompaniesQueryResponse>>>
     {
-        private readonly ICompanyService _companyService;
+        private readonly IBaseRepository<Company> _repository;
         private readonly IMapper _mapper;
-        public GetAllCompaniesQueryHandler(ICompanyService companyService, IMapper mapper)
+        public GetAllCompaniesQueryHandler(IBaseRepository<Company> repository, IMapper mapper)
         {
-            _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<Result<List<GetAllCompaniesQueryResponse>>> Handle(GetAllCompaniesQueryRequest request, CancellationToken cancellationToken)
         {
-            var result = await _companyService.GetCompaniesAsync();
+            var companies = await _repository.GetListAsync(includeExpression: x => x.Jobs!);
 
-            if (!result.IsSuccess)
-                return Result<List<GetAllCompaniesQueryResponse>>.Failure(result.ErrorMessage!, result.StatusCode);
+            if (companies is null || !companies.Any())
+                return Result<List<GetAllCompaniesQueryResponse>>.Failure("Data not found.", (int)HttpStatusCode.NotFound);
 
-            return _mapper.Map<List<GetAllCompaniesQueryResponse>>(result.Data).ToResult();
+            return _mapper.Map<List<GetAllCompaniesQueryResponse>>(companies).ToResult();
         }
     }
 }

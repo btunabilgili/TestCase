@@ -20,11 +20,6 @@ namespace TestCase.Infrastructure.Contexts.Configurations
                 .WithMany(c => c.Jobs)
                 .HasForeignKey(j => j.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(j => j.SideRights)
-                .WithOne(sr => sr.Job)
-                .HasForeignKey(sr => sr.JobId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

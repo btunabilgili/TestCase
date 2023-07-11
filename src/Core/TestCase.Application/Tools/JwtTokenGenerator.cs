@@ -7,13 +7,13 @@ using TestCase.Application.Common;
 using TestCase.Application.Features.AuthFeatures.Commands.Responses;
 using TestCase.Application.Interfaces;
 
-namespace TestCase.Infrastructure.Services
+namespace TestCase.Application.Tools
 {
-    public class AuthService : IAuthService
+    public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly JwtOptions _jwtOptions;
 
-        public AuthService(IOptions<JwtOptions> options)
+        public JwtTokenGenerator(IOptions<JwtOptions> options)
         {
             _jwtOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }

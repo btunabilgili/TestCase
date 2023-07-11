@@ -2,6 +2,7 @@
 using FluentValidation;
 using MediatR;
 using System.Net;
+using System.Text.RegularExpressions;
 using TestCase.Application.Common;
 using TestCase.Application.Features.JobFeatures.Commands.Requests;
 using TestCase.Application.Features.JobFeatures.Commands.Responses;
@@ -12,17 +13,20 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
 {
     public class JobCreateCommandHandler : IRequestHandler<JobCreateCommandRequest, Result<JobCreateCommandResponse>>
     {
+        private readonly IBaseRepository<Job> _jobRepository;
+        private readonly IBaseRepository<Company> _companyRepository;
         private readonly IJobService _jobService;
-        private readonly ICompanyService _companyService;
         private readonly IMapper _mapper;
         private readonly IValidator<JobCreateCommandRequest> _validator;
-        public JobCreateCommandHandler(IJobService jobService,
-            ICompanyService companyService,
+        public JobCreateCommandHandler(IBaseRepository<Job> jobRepository,
+            IBaseRepository<Company> companyRepository,
+            IJobService jobService,
             IMapper mapper,
             IValidator<JobCreateCommandRequest> validator)
         {
+            _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
+            _companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
             _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
-            _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
@@ -34,24 +38,24 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
             if (!validationResult.IsValid)
                 return Result<JobCreateCommandResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
+            var company = await _companyRepository.GetByIdAsync(request.CompanyId);
+
+            if (company is null)
+                return Result<JobCreateCommandResponse>.Failure("Company not found", (int)HttpStatusCode.NotFound);
+
             var job = _mapper.Map<Job>(request);
 
             job.QualityPoint = _jobService.CalculateJobQualityPoint(job);
 
-            var result = await _jobService.CreateJobAsync(job);
-
-            if (!result.IsSuccess)
-                return Result<JobCreateCommandResponse>.Failure(result.ErrorMessage!, result.StatusCode);
+            await _jobRepository.AddAsync(job);
 
             //TODO: transaction between company and job!
-            var companyResult = await _companyService.GetCompanyAsync(x => x.Id == job.CompanyId);
-            var company = companyResult.Data!;
             company.RemainingJobCount -= 1;
 
-            await _companyService.UpdateCompanyAsync(company);
+            _companyRepository.Update(company);
             
 
-            return _mapper.Map<JobCreateCommandResponse>(result.Data).ToResult();
+            return _mapper.Map<JobCreateCommandResponse>(job).ToResult();
         }
     }
 }

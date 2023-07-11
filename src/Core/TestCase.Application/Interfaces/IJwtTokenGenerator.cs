@@ -2,7 +2,7 @@
 
 namespace TestCase.Application.Interfaces
 {
-    public interface IAuthService
+    public interface IJwtTokenGenerator
     {
         TokenCreateCommandResponse GenerateJwtToken(Guid companyId);
     }

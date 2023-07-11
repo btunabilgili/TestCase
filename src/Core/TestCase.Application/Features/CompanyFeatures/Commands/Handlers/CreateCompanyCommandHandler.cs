@@ -12,14 +12,14 @@ namespace TestCase.Application.Features.CompanyFeatures.Commands.Handlers
 {
     public class CreateCustomerCommandHandler : IRequestHandler<CreateCompanyCommandRequest, Result<CreateCompanyCommandResponse>>
     {
-        private readonly ICompanyService _companyService;
+        private readonly IBaseRepository<Company> _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<CreateCompanyCommandRequest> _validator;
-        public CreateCustomerCommandHandler(ICompanyService companyService, 
+        public CreateCustomerCommandHandler(IBaseRepository<Company> repository, 
             IMapper mapper,
             IValidator<CreateCompanyCommandRequest> validator)
         {
-            _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
@@ -33,10 +33,7 @@ namespace TestCase.Application.Features.CompanyFeatures.Commands.Handlers
 
             var company = _mapper.Map<Company>(request);
 
-            var result = await _companyService.CreateCompanyAsync(company);
-
-            if (!result.IsSuccess)
-                return Result<CreateCompanyCommandResponse>.Failure(result.ErrorMessage!, result.StatusCode);
+            await _repository.AddAsync(company);
 
             return _mapper.Map<CreateCompanyCommandResponse>(company).ToResult();
         }

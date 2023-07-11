@@ -10,7 +10,7 @@ namespace TestCase.Application.Features.JobFeatures.Queries.Responses
         public required string JobDescription { get; set; }
         public DateTime ExpirationDate { get; set; }
         public int QualityPoint { get; set; }
-        public List<SideRightTypes>? SideRights { get; set; }
+        public string? SideRights { get; set; }
         public WorkTypes WorkType { get; set; }
         public int SalaryInformation { get; set; }
 

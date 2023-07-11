@@ -6,19 +6,20 @@ using TestCase.Application.Common;
 using TestCase.Application.Features.CompanyFeatures.Queries.Requests;
 using TestCase.Application.Features.CompanyFeatures.Queries.Responses;
 using TestCase.Application.Interfaces;
+using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Features.CompanyFeatures.Queries.Handlers
 {
     public class GetCompanyByIdQueryHandler : IRequestHandler<GetCompanyByIdQueryRequest, Result<GetCompanyByIdQueryResponse>>
     {
-        private readonly ICompanyService _companyService;
+        private readonly IBaseRepository<Company> _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<GetCompanyByIdQueryRequest> _validator;
-        public GetCompanyByIdQueryHandler(ICompanyService companyService, 
+        public GetCompanyByIdQueryHandler(IBaseRepository<Company> repository, 
             IMapper mapper,
             IValidator<GetCompanyByIdQueryRequest> validator)
         {
-            _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
@@ -30,12 +31,12 @@ namespace TestCase.Application.Features.CompanyFeatures.Queries.Handlers
             if (!validationResult.IsValid)
                 return Result<GetCompanyByIdQueryResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var result = await _companyService.GetCompanyAsync(x => x.Id == request.Id);
+            var company = await _repository.GetByIdAsync(request.Id);
 
-            if (!result.IsSuccess)
-                return Result<GetCompanyByIdQueryResponse>.Failure(result.ErrorMessage!, result.StatusCode);
+            if (company is null)
+                return Result<GetCompanyByIdQueryResponse>.Failure("Company not found", (int)HttpStatusCode.NotFound);
 
-            return _mapper.Map<GetCompanyByIdQueryResponse>(result.Data).ToResult();
+            return _mapper.Map<GetCompanyByIdQueryResponse>(company).ToResult();
         }
     }
 }

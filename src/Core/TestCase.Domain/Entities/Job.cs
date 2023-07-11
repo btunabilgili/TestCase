@@ -9,7 +9,7 @@ namespace TestCase.Domain.Entities
         public required string JobDescription { get; set; }
         public required int ListingDurationInDays { get; set; }
         public int QualityPoint { get; set; }
-        public ICollection<SideRights>? SideRights { get; set; }
+        public string? SideRights { get; set; }
         public WorkTypes? WorkType { get; set; }
         public int? SalaryInformation { get; set; }
 
