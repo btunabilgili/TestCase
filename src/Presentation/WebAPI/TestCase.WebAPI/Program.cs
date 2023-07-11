@@ -1,11 +1,14 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 using TestCase.Application.Common;
 using TestCase.Application.Extensions;
+using TestCase.Application.Interfaces;
 using TestCase.Infrastructure.Extensions;
+using TestCase.WebAPI.Middlewares;
 
 namespace TestCase.WebAPI
 {
@@ -15,6 +18,16 @@ namespace TestCase.WebAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            #region Serilog
+            builder.Logging.ClearProviders();
+            builder.Host.UseSerilog((hostContext, services, configuration) => {
+                configuration
+                    .WriteTo.Console()
+                    .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("logs"), "logs", needAutoCreateTable: true);
+            });
+            #endregion
+
+            #region JWTAuth
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -64,20 +77,23 @@ namespace TestCase.WebAPI
                                 Id = "bearerAuth"
                             }
                         },
-                        new string[] {}
+                        Array.Empty<string>()
                     }
                 };
 
                 options.AddSecurityDefinition("bearerAuth", securityScheme);
                 options.AddSecurityRequirement(securityRequirement);
             });
-
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JWTSettings"));
+            #endregion
 
+            builder.Services.AddTransient<ExceptionMiddleware>();
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("testCase")!, builder.Configuration.GetConnectionString("hangfire")!);
 
             var app = builder.Build();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {
@@ -95,6 +111,10 @@ namespace TestCase.WebAPI
             app.UseInfrastructure();
 
             app.MapControllers();
+
+            #region HangfireJobs
+            RecurringJob.AddOrUpdate<IHangfireService>(Guid.NewGuid().ToString(),x => x.SendReminderEmailAsync(), Cron.Daily);
+            #endregion
 
             app.Run();
         }

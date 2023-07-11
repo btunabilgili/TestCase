@@ -29,6 +29,9 @@ namespace TestCase.Infrastructure.Extensions
             services.AddScoped<IJobService, JobService>();
             services.AddScoped<IAuthService, AuthService>();
 
+            services.AddTransient<IHangfireService, HangfireService>();
+            services.AddTransient<IFakeEmailService, FakeEmailService>();
+
             return services;
         }
 
