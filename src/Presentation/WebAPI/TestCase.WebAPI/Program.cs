@@ -50,7 +50,7 @@ namespace TestCase.WebAPI
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
                     Scheme = "bearer",
-                    BearerFormat = "JWT" // Optional
+                    BearerFormat = "JWT"
                 };
 
                 var securityRequirement = new OpenApiSecurityRequirement
@@ -70,26 +70,6 @@ namespace TestCase.WebAPI
 
                 options.AddSecurityDefinition("bearerAuth", securityScheme);
                 options.AddSecurityRequirement(securityRequirement);
-                //options.AddSecurityDefinition("Bearer,", new OpenApiSecurityScheme
-                //{
-                //    Description = "Please insert your JWT Token into field",
-                //    Name = "Authorization",
-                //    Type = SecuritySchemeType.ApiKey,
-                //    In = ParameterLocation.Header,
-                //    Scheme = "Bearer",
-                //    BearerFormat = "JWT"
-                //});
-                //options.AddSecurityRequirement(new OpenApiSecurityRequirement{
-                //    {
-                //        new OpenApiSecurityScheme{
-                //            Reference = new OpenApiReference{
-                //                Type = ReferenceType.SecurityScheme,
-                //                Id = "Bearer"
-                //            }
-                //        },
-                //        new string[]{}
-                //    }
-                //});
             });
 
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JWTSettings"));
