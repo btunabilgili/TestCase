@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System.Net;
+﻿using System.Net;
 using TestCase.Domain.Exceptions;
 using TestCase.Application.Common;
+using System.Text.Json;
 
 namespace TestCase.WebAPI.Middlewares
 {
@@ -33,7 +33,7 @@ namespace TestCase.WebAPI.Middlewares
                 {
                     response.ContentType = "application/json";
                     response.StatusCode = result.StatusCode;
-                    await response.WriteAsync(JsonConvert.SerializeObject(result));
+                    await response.WriteAsync(JsonSerializer.Serialize(result));
                 }
                 else
                     _logger.LogWarning("Can't write error response. Response has already started.");

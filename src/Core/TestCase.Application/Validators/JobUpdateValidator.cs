@@ -15,7 +15,6 @@ namespace TestCase.Application.Validators
             RuleFor(x => x.Id).NotEmpty().WithMessage("Id must not be empty").MustAsync(JobExists).WithMessage("Job not found");
             RuleFor(x => x.Position).NotEmpty().WithMessage("Position must not be empty");
             RuleFor(x => x.JobDescription).NotEmpty().WithMessage("Job description must not be empty");
-            RuleFor(x => x.CompanyId).NotEmpty().WithMessage("Company Id must not be empty");
         }
 
         private async Task<bool> JobExists(Guid jobId, CancellationToken cancellationToken)

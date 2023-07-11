@@ -14,6 +14,5 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Requests
         public List<SideRightTypes>? SideRights { get; set; }
         public WorkTypes? WorkType { get; set; }
         public int? SalaryInformation { get; set; }
-        public required Guid CompanyId { get; set; }
     }
 }

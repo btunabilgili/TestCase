@@ -1,0 +1,40 @@
+version: '3.4'
+
+networks:
+  dev:
+    driver: bridge
+
+
+services:
+    testcase-webapi:
+        image: docker.io/library/testcase-webapi
+        depends_on:
+        - "testcase_db"
+        container_name: testcase-services
+        ports:
+        - "8088:80"
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+        - ConnectionStrings__testCase=Server=testcase_db;Port=5432;Database=testCase;User Id=postgres;Password=postgresql;
+        - ConnectionStrings__logs=Server=testcase_db;Port=5432;Database=logs;User Id=postgres;Password=postgresql;
+        - ASPNETCORE_URLS=http://+:80
+        networks:
+        - dev
+    testcase_db:
+        image: postgres:latest
+        container_name: testcase_db
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgresql
+        ports:
+            - "5433:5432"
+        restart: always
+        volumes:
+            - app_data:/var/lib/postgresql/data
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        networks:
+            - dev
+volumes:
+    app_data:

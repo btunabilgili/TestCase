@@ -1,0 +1,2 @@
+CREATE DATABASE "testCase";
+CREATE DATABASE "logs";

@@ -1,12 +1,12 @@
-using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
 using TestCase.Application.Common;
 using TestCase.Application.Extensions;
-using TestCase.Application.Interfaces;
+using TestCase.Infrastructure.Contexts;
 using TestCase.Infrastructure.Extensions;
 using TestCase.WebAPI.Middlewares;
 
@@ -22,6 +22,7 @@ namespace TestCase.WebAPI
             builder.Logging.ClearProviders();
             builder.Host.UseSerilog((hostContext, services, configuration) => {
                 configuration
+                    .ReadFrom.Configuration(builder.Configuration)
                     .WriteTo.Console()
                     .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("logs"), "logs", needAutoCreateTable: true);
             });
@@ -89,7 +90,7 @@ namespace TestCase.WebAPI
 
             builder.Services.AddTransient<ExceptionMiddleware>();
             builder.Services.AddApplication();
-            builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("testCase")!, builder.Configuration.GetConnectionString("hangfire")!);
+            builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("testCase")!);
 
             var app = builder.Build();
 
@@ -108,13 +109,12 @@ namespace TestCase.WebAPI
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseInfrastructure();
-
             app.MapControllers();
 
-            #region HangfireJobs
-            RecurringJob.RemoveIfExists("email-remainder-job");
-            RecurringJob.AddOrUpdate<IHangfireService>("email-remainder-job", x => x.SendReminderEmailAsync(), Cron.Daily);
+            #region RunMigrations
+            using var scope = app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TestCaseContext>();
+            context.Database.MigrateAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             #endregion
 
             app.Run();
