@@ -113,7 +113,8 @@ namespace TestCase.WebAPI
             app.MapControllers();
 
             #region HangfireJobs
-            RecurringJob.AddOrUpdate<IHangfireService>(Guid.NewGuid().ToString(),x => x.SendReminderEmailAsync(), Cron.Daily);
+            RecurringJob.RemoveIfExists("email-remainder-job");
+            RecurringJob.AddOrUpdate<IHangfireService>("email-remainder-job", x => x.SendReminderEmailAsync(), Cron.Daily);
             #endregion
 
             app.Run();
