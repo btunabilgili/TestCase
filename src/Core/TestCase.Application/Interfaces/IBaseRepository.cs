@@ -8,6 +8,7 @@ namespace TestCase.Application.Interfaces
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(Guid id);
+        void Attach(T entity);
         Task<T> GetByIdAsync(Guid id, Expression<Func<T, object>>? includeExpression = null);
         Task<List<T>> GetListAsync(Expression<Func<T, object>>? includeExpression = null, Expression<Func<T, bool>>? predicate = null);
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>? includeExpression = null);

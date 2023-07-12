@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using TestCase.Application.Common;
 using TestCase.Application.Features.JobFeatures.Commands.Responses;
-using TestCase.Domain.Entities;
 using TestCase.Domain.Enums;
 
 namespace TestCase.Application.Features.JobFeatures.Commands.Requests
@@ -11,6 +10,7 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Requests
         public required Guid Id { get; set; }
         public required string Position { get; set; }
         public required string JobDescription { get; set; }
+        public required int ListingDurationInDays { get; set; }
         public List<SideRightTypes>? SideRights { get; set; }
         public WorkTypes? WorkType { get; set; }
         public int? SalaryInformation { get; set; }

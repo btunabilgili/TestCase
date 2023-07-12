@@ -2,7 +2,6 @@
 using FluentValidation;
 using MediatR;
 using System.Net;
-using System.Text.RegularExpressions;
 using TestCase.Application.Common;
 using TestCase.Application.Features.JobFeatures.Commands.Requests;
 using TestCase.Application.Features.JobFeatures.Commands.Responses;
@@ -46,8 +45,8 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
             job.QualityPoint = _jobService.CalculateJobQualityPoint(job);
             await _uow.JobRepository.AddAsync(job);
 
+            _uow.CompanyRepository.Attach(company);
             company.RemainingJobCount -= 1;
-            await _uow.CompanyRepository.UpdateAsync(company);
 
             await _uow.SaveChangesAsync();
 

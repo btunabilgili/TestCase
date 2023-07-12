@@ -15,6 +15,5 @@ namespace TestCase.Application.Features.JobFeatures.Queries.Responses
         public int SalaryInformation { get; set; }
 
         public required Guid CompanyId { get; set; }
-        public required Company Company { get; set; }
     }
 }

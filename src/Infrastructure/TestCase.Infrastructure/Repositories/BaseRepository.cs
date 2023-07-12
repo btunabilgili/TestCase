@@ -40,6 +40,11 @@ namespace TestCase.Infrastructure.Repositories
                 _dbSet.Remove(entity);
         }
 
+        public virtual void Attach(T entity)
+        {
+            _context.Attach(entity);
+        }
+
         public virtual async Task<T> GetByIdAsync(Guid id, Expression<Func<T, object>>? includeExpression = null)
         {
             var query = _dbSet.AsQueryable();

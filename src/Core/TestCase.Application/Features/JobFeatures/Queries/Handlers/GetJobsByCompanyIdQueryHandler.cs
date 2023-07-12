@@ -31,7 +31,7 @@ namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
             if (!validationResult.IsValid)
                 return Result<List<GetJobsByCompanyIdQueryResponse>>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var jobs = await _repository.GetListAsync(x => x.CompanyId == request.ComapnyId);
+            var jobs = await _repository.GetListAsync(predicate: x => x.CompanyId == request.ComapnyId);
 
             if (jobs is null || !jobs.Any())
                 return Result<List<GetJobsByCompanyIdQueryResponse>>.Failure("No jobs found for that criteria", (int)HttpStatusCode.NotFound);

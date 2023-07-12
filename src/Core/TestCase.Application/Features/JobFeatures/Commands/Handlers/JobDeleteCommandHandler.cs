@@ -3,8 +3,10 @@ using MediatR;
 using System.Net;
 using TestCase.Application.Common;
 using TestCase.Application.Features.JobFeatures.Commands.Requests;
+using TestCase.Application.Features.JobFeatures.Commands.Responses;
 using TestCase.Application.Interfaces;
 using TestCase.Domain.Entities;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
 {
@@ -26,7 +28,18 @@ namespace TestCase.Application.Features.JobFeatures.Commands.Handlers
             if (!validationResult.IsValid)
                 return Result<bool>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
+            var job = await _uow.JobRepository.GetByIdAsync(request.Id);
+
+            var company = await _uow.CompanyRepository.GetByIdAsync(job.CompanyId);
+
+            if (company is null)
+                return Result<bool>.Failure("Company not found", (int)HttpStatusCode.NotFound);
+
             await _uow.JobRepository.DeleteAsync(request.Id);
+
+            _uow.CompanyRepository.Attach(company);
+            company.RemainingJobCount += 1;
+
             await _uow.SaveChangesAsync();
 
             return true.ToResult();

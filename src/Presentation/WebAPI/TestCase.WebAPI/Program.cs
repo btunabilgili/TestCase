@@ -96,13 +96,10 @@ namespace TestCase.WebAPI
 
             app.UseMiddleware<ExceptionMiddleware>();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(options => {
-                    options.SwaggerEndpoint("/swagger/V1/swagger.json", "Main API Documantation of TestCase API");
-                });
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI(options => {
+                options.SwaggerEndpoint("/swagger/V1/swagger.json", "Main API Documantation of TestCase API");
+            });
 
             app.UseHttpsRedirection();
 
@@ -112,9 +109,12 @@ namespace TestCase.WebAPI
             app.MapControllers();
 
             #region RunMigrations
-            using var scope = app.Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<TestCaseContext>();
-            context.Database.MigrateAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            if (!app.Environment.IsDevelopment())
+            {
+                using var scope = app.Services.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<TestCaseContext>();
+                context.Database.MigrateAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            }
             #endregion
 
             app.Run();

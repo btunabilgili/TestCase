@@ -19,6 +19,9 @@ services:
         environment:
         - ConnectionStrings__testCase=Server=testcase_db;Port=5432;Database=testCase;User Id=postgres;Password=postgresql;
         - ConnectionStrings__logs=Server=testcase_db;Port=5432;Database=logs;User Id=postgres;Password=postgresql;
+        - JWTSettings__Issuer=TestCase.issuer.com
+        - JWTSettings__Audience=TestCase.audience.com
+        - JWTSettings__Key=MyRandomTooLongStringKeyForHS256!!
         - ASPNETCORE_URLS=http://+:80
         networks:
         - dev

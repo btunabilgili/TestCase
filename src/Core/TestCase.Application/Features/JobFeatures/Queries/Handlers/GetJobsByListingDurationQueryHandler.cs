@@ -10,7 +10,7 @@ using TestCase.Domain.Entities;
 
 namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
 {
-    public class GetJobsByListingDurationQueryHandler : IRequestHandler<GetJobsByListingDurationQueryRequest, Result<GetJobsByListingDurationQueryResponse>>
+    public class GetJobsByListingDurationQueryHandler : IRequestHandler<GetJobsByListingDurationQueryRequest, Result<List<GetJobsByListingDurationQueryResponse>>>
     {
         private readonly IBaseRepository<Job> _repository;
         private readonly IMapper _mapper;
@@ -24,19 +24,19 @@ namespace TestCase.Application.Features.JobFeatures.Queries.Handlers
             _validator = validator ?? throw new ArgumentNullException(nameof(validator)); 
         }
 
-        public async Task<Result<GetJobsByListingDurationQueryResponse>> Handle(GetJobsByListingDurationQueryRequest request, CancellationToken cancellationToken)
+        public async Task<Result<List<GetJobsByListingDurationQueryResponse>>> Handle(GetJobsByListingDurationQueryRequest request, CancellationToken cancellationToken)
         {
             var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
             if (!validationResult.IsValid)
-                return Result<GetJobsByListingDurationQueryResponse>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
+                return Result<List<GetJobsByListingDurationQueryResponse>>.Failure(string.Join(",", validationResult.Errors), (int)HttpStatusCode.BadRequest);
 
-            var jobs = await _repository.GetListAsync(x => x.ListingDurationInDays == request.ListingDurationInDays);
+            var jobs = await _repository.GetListAsync(predicate: x => x.ListingDurationInDays == request.ListingDurationInDays);
 
             if (jobs is null || !jobs.Any())
-                return Result<GetJobsByListingDurationQueryResponse>.Failure("No jobs found for that criteria", (int)HttpStatusCode.NotFound);
+                return Result<List<GetJobsByListingDurationQueryResponse>>.Failure("No jobs found for that criteria", (int)HttpStatusCode.NotFound);
 
-            return _mapper.Map<GetJobsByListingDurationQueryResponse>(jobs).ToResult();
+            return _mapper.Map<List<GetJobsByListingDurationQueryResponse>>(jobs).ToResult();
         }
     }
 }

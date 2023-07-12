@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using System;
 using TestCase.Application.Extensions;
 using TestCase.Application.Features.CompanyFeatures.Commands.Requests;
 using TestCase.Application.Features.CompanyFeatures.Commands.Responses;
@@ -30,22 +29,24 @@ namespace TestCase.Application.Mapping
             #region Job
             CreateMap<JobCreateCommandRequest, Job>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",", src.SideRights) : null));
             CreateMap<JobUpdateCommandRequest, Job>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",", src.SideRights) : null));
-            CreateMap<Job, JobCreateCommandResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ?
-            string.Join(",", src.SideRights.Split(",", StringSplitOptions.None)
-                .Select(x => Enum.Parse<SideRightTypes>(x))
-                .Select(x => x.GetDescription())) : null));
-            CreateMap<Job, GetJobByIdQueryResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ?
-            string.Join(",", src.SideRights.Split(",", StringSplitOptions.None)
-                .Select(x => Enum.Parse<SideRightTypes>(x))
-                .Select(x => x.GetDescription())) : null));
-            CreateMap<Job, GetJobsByCompanyIdQueryResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? 
-            string.Join(",",src.SideRights.Split(",", StringSplitOptions.None)
-                .Select(x => Enum.Parse<SideRightTypes>(x))
-                .Select(x => x.GetDescription())) :  null));
-            CreateMap<Job, JobUpdateCommandResponse>().ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ?
-            string.Join(",", src.SideRights.Split(",", StringSplitOptions.None)
-                .Select(x => Enum.Parse<SideRightTypes>(x))
-                .Select(x => x.GetDescription())) : null));
+            CreateMap<Job, JobCreateCommandResponse>()
+                .ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",", src.SideRights.Split(",", StringSplitOptions.None).Select(x => Enum.Parse<SideRightTypes>(x)).Select(x => x.GetDescription())) : null))
+                .ForMember(dest => dest.ExpirationDate, opt => opt.MapFrom(src => src.CreateDate.Date.AddDays(src.ListingDurationInDays)));
+            CreateMap<Job, GetJobByIdQueryResponse>()
+                .ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",", src.SideRights.Split(",", StringSplitOptions.None).Select(x => Enum.Parse<SideRightTypes>(x)).Select(x => x.GetDescription())) : null))
+                .ForMember(dest => dest.ExpirationDate, opt => opt.MapFrom(src => src.CreateDate.Date.AddDays(src.ListingDurationInDays)));
+
+            CreateMap<Job, GetJobsByCompanyIdQueryResponse>()
+                .ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",",src.SideRights.Split(",", StringSplitOptions.None).Select(x => Enum.Parse<SideRightTypes>(x)).Select(x => x.GetDescription())) :  null))
+                .ForMember(dest => dest.ExpirationDate, opt => opt.MapFrom(src => src.CreateDate.Date.AddDays(src.ListingDurationInDays)));
+
+            CreateMap<Job, JobUpdateCommandResponse>()
+                .ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",", src.SideRights.Split(",", StringSplitOptions.None).Select(x => Enum.Parse<SideRightTypes>(x)).Select(x => x.GetDescription())) : null))
+                .ForMember(dest => dest.ExpirationDate, opt => opt.MapFrom(src => src.CreateDate.Date.AddDays(src.ListingDurationInDays)));
+
+            CreateMap<Job, GetJobsByListingDurationQueryResponse>()
+                .ForMember(dest => dest.SideRights, opt => opt.MapFrom(src => src.SideRights != null ? string.Join(",", src.SideRights.Split(",", StringSplitOptions.None).Select(x => Enum.Parse<SideRightTypes>(x)).Select(x => x.GetDescription())) : null))
+                .ForMember(dest => dest.ExpirationDate, opt => opt.MapFrom(src => src.CreateDate.Date.AddDays(src.ListingDurationInDays)));
             #endregion
         }
     }

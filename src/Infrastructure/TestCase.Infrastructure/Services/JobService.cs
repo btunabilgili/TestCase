@@ -20,9 +20,9 @@ namespace TestCase.Infrastructure.Services
                 qualityPoint += 1;
 
             //Yasaklı kelimeleri veritabanı ya da başka bir sağlayıcıdan çekmek daha doğru olacaktır ancak şimdilik projenin hızlı ilerlemesi açısından kod içerisinde bırakıldı.
-            string badWordsPattern = @"\b(mobing|ırkçılık)\b";
+            string badWordsPattern = @"\b(mob(i|İ|ı)ng|ırkçılık)\b";
 
-            Regex regex = new(badWordsPattern, RegexOptions.IgnoreCase);
+            Regex regex = new(badWordsPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
             if (!regex.IsMatch(job.JobDescription))
                 qualityPoint += 2;

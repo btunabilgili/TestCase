@@ -15,6 +15,7 @@ namespace TestCase.Application.Validators
             RuleFor(x => x.Position).NotEmpty().WithMessage("Position must not be empty");
             RuleFor(x => x.JobDescription).NotEmpty().WithMessage("Job description must not be empty");
             RuleFor(x => x.CompanyId).NotEmpty().WithMessage("Company Id must not be empty").MustAsync(CheckForRemaningJobPost).WithMessage("You don't have enough job posts remaining");
+            RuleFor(x => x.ListingDurationInDays).NotEmpty().WithMessage("Listing duration must not be empty").MustAsync(BeValidListingDurationInDays).WithMessage("Listing duration must be greater than zero");
         }
 
         private async Task<bool> CheckForRemaningJobPost(Guid companyId, CancellationToken cancellation)
@@ -25,6 +26,11 @@ namespace TestCase.Application.Validators
                 return false;
 
             return company.RemainingJobCount > 0;
+        }
+
+        private Task<bool> BeValidListingDurationInDays(int listingDurationInDays, CancellationToken cancellation)
+        {
+            return Task.FromResult(listingDurationInDays > 0);
         }
     }
 }

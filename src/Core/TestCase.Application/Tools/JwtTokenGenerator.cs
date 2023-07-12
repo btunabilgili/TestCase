@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,14 +13,18 @@ namespace TestCase.Application.Tools
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly JwtOptions _jwtOptions;
+        private readonly ILogger<JwtTokenGenerator> _logger;
 
-        public JwtTokenGenerator(IOptions<JwtOptions> options)
+        public JwtTokenGenerator(IOptions<JwtOptions> options, ILogger<JwtTokenGenerator> logger)
         {
             _jwtOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public TokenCreateCommandResponse GenerateJwtToken(Guid companyId)
         {
+            _logger.LogInformation("JWT Generation");
+            _logger.LogInformation(_jwtOptions.Key);
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
