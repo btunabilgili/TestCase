@@ -2,6 +2,8 @@
 
 Proje docker ortamında 8088 portunda çalışmaktadır. Kullanım kolaylığı açısından swagger production ortamında da çalışacak şekilde configure edilmiştir. http://localhost:8088/swagger/index.html bu url üzerinden postman ya da başka bir toola gerek kalmadan API ile etkileşime geçilebilir.
 
+Projede kullanılan mimari, teknoloji ve tasarım desenleri: .NET 7.0 Web API, Entity Framewrok Core, JWT Token Authentication, Serilog(Global exception handler PostgreSQL sink), Mediatr, Automapper, FluentValidation, Onion Architecture, CQRS, Repository and Unit Of Work Patterns, PostgreSQL
+
 
 ## API Kullanımı
 
